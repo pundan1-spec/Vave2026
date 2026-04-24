@@ -11,13 +11,20 @@ import {
   ReferenceLine,
 } from "recharts";
 import type { Idea } from "@/lib/vave/types";
+import { convert, FX, type CurrencyCode } from "@/lib/vave/currency";
 
-export default function WeightCostChart({ ideas }: { ideas: Idea[] }) {
+export default function WeightCostChart({
+  ideas,
+  currency,
+}: {
+  ideas: Idea[];
+  currency: CurrencyCode;
+}) {
+  const sym = FX[currency].symbol;
   const data = ideas.map((i, idx) => ({
     name: `#${idx + 1}`,
     x: i.weight_delta_pct,
-    y: i.cost_delta_per_part_usd,
-    z: Math.abs(i.cost_delta_program_usd),
+    y: convert(i.cost_delta_per_part_usd, currency),
     lever: i.lever,
     title: i.title,
   }));
@@ -42,9 +49,13 @@ export default function WeightCostChart({ ideas }: { ideas: Idea[] }) {
             type="number"
             dataKey="y"
             name="Δ cost"
-            unit="$"
             stroke="#9aa8bd"
-            label={{ value: "Δ cost ($/part)", angle: -90, position: "insideLeft", fill: "#9aa8bd" }}
+            label={{
+              value: `Δ cost (${sym}/part)`,
+              angle: -90,
+              position: "insideLeft",
+              fill: "#9aa8bd",
+            }}
           />
           <ReferenceLine x={0} stroke="#445674" />
           <ReferenceLine y={0} stroke="#445674" />
@@ -52,11 +63,9 @@ export default function WeightCostChart({ ideas }: { ideas: Idea[] }) {
             contentStyle={{ background: "#1b2233", border: "1px solid #33415b" }}
             labelStyle={{ color: "#e4e9f0" }}
             formatter={(value: number, key: string) =>
-              key === "x" ? `${value.toFixed(1)}%` : key === "y" ? `$${value.toFixed(2)}` : value
+              key === "x" ? `${value.toFixed(1)}%` : key === "y" ? `${sym}${value.toFixed(currency === "INR" ? 0 : 2)}` : value
             }
-            labelFormatter={(_, payload) =>
-              payload?.[0]?.payload?.title ?? ""
-            }
+            labelFormatter={(_, payload) => payload?.[0]?.payload?.title ?? ""}
           />
           <Legend wrapperStyle={{ color: "#9aa8bd" }} />
           <Scatter name="Ideas" data={data} fill="#ff7a1a" />

@@ -1,14 +1,18 @@
 "use client";
 import type { BaselineSummary, Idea } from "@/lib/vave/types";
+import { formatMoney, type CurrencyCode } from "@/lib/vave/currency";
 
 export default function CompareTable({
   baseline,
   ideas,
+  currency,
 }: {
   baseline: BaselineSummary;
   ideas: Idea[];
+  currency: CurrencyCode;
 }) {
   const top = ideas.slice(0, 5);
+  const costDigits = currency === "INR" ? 1 : 2;
   return (
     <div className="card overflow-x-auto">
       <h3 className="text-base font-semibold mb-3 text-steel-50">Baseline vs. top 5 ideas</h3>
@@ -48,21 +52,30 @@ export default function CompareTable({
             values={["0.00", ...top.map((i) => i.weight_delta_pct.toFixed(2))]}
           />
           <Row
-            label="Cost / part ($)"
+            label={`Cost / part (${currency})`}
             values={[
-              baseline.cost_per_part_usd.toFixed(2),
-              ...top.map((i) => (baseline.cost_per_part_usd + i.cost_delta_per_part_usd).toFixed(2)),
+              formatMoney(baseline.cost_per_part_usd, currency, { fractionDigits: costDigits }),
+              ...top.map((i) =>
+                formatMoney(baseline.cost_per_part_usd + i.cost_delta_per_part_usd, currency, {
+                  fractionDigits: costDigits,
+                }),
+              ),
             ]}
           />
           <Row
-            label="Δ cost ($/part)"
-            values={["0.00", ...top.map((i) => i.cost_delta_per_part_usd.toFixed(2))]}
+            label={`Δ cost (${currency}/part)`}
+            values={[
+              formatMoney(0, currency, { fractionDigits: costDigits }),
+              ...top.map((i) =>
+                formatMoney(i.cost_delta_per_part_usd, currency, { fractionDigits: costDigits }),
+              ),
+            ]}
           />
           <Row
-            label="Δ program ($/yr)"
+            label={`Δ program (${currency}/yr)`}
             values={[
-              "0",
-              ...top.map((i) => Math.round(i.cost_delta_program_usd).toLocaleString()),
+              formatMoney(0, currency, { compact: true }),
+              ...top.map((i) => formatMoney(i.cost_delta_program_usd, currency, { compact: true })),
             ]}
           />
           <Row label="Confidence" values={["—", ...top.map((i) => i.confidence)]} />

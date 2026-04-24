@@ -1,4 +1,6 @@
 export type GradeFamily =
+  | "IF"
+  | "IF-HS"
   | "Mild"
   | "HSLA"
   | "BH"

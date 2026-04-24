@@ -1,33 +1,98 @@
 "use client";
 import { useMemo, useState } from "react";
 import type { VaveInput } from "@/lib/vave/types";
+import type { CurrencyCode } from "@/lib/vave/currency";
 import gradesJson from "@/data/grades.json";
 import coatingsJson from "@/data/coatings.json";
 import joiningJson from "@/data/joining.json";
 import partRulesJson from "@/data/partRules.json";
 
-const GRADES = gradesJson as unknown as { id: string; name: string; family: string; typical_thk_mm: [number, number] }[];
+const GRADES = gradesJson as unknown as {
+  id: string;
+  name: string;
+  family: string;
+  typical_thk_mm: [number, number];
+}[];
 const COATINGS = coatingsJson as unknown as { id: string; name: string }[];
 const JOINING = joiningJson as unknown as { id: string; name: string }[];
-const PART_RULES = partRulesJson as unknown as Record<string, { label: string; function: string }>;
+const PART_RULES = partRulesJson as unknown as Record<
+  string,
+  { label: string; function: string }
+>;
 
+// India-context default: HSLA rail @ 1.5 mm, 150k/yr, GA + RSW, ₹ INR.
 const DEFAULT: VaveInput = {
-  current_grade_id: "DP-340",
-  current_thk_mm: 1.4,
-  part_family: "b_pillar_outer",
-  annual_volume: 200000,
-  blank_area_m2: 0.95,
+  current_grade_id: "HSLA-340",
+  current_thk_mm: 1.5,
+  part_family: "rail",
+  annual_volume: 150000,
+  blank_area_m2: 0.8,
   current_coating_id: "GA",
   current_joining_ids: ["RSW"],
-  currency: "USD",
+  currency: "INR",
 };
+
+const PRESETS: {
+  label: string;
+  note: string;
+  input: VaveInput;
+}[] = [
+  {
+    label: "Floor pan · Mild 0.8 mm",
+    note: "Classic Indian baseline — room to move to IF-HS/BH and down-gauge.",
+    input: {
+      current_grade_id: "MILD-140",
+      current_thk_mm: 0.8,
+      part_family: "floor_pan",
+      annual_volume: 200000,
+      blank_area_m2: 1.8,
+      current_coating_id: "GA",
+      current_joining_ids: ["RSW"],
+      currency: "INR",
+    },
+  },
+  {
+    label: "Door inner · IF 0.75 mm",
+    note: "IF deep-draw baseline — move to IF-HS or DP-HE for weight save.",
+    input: {
+      current_grade_id: "IF-180",
+      current_thk_mm: 0.75,
+      part_family: "door_inner",
+      annual_volume: 200000,
+      blank_area_m2: 1.1,
+      current_coating_id: "GA",
+      current_joining_ids: ["RSW"],
+      currency: "INR",
+    },
+  },
+  {
+    label: "B-pillar reinf · HSLA 1.6 mm",
+    note: "Legacy BIW — candidate for PHS1500 with Al-Si + pulsed RSW + weld-bond.",
+    input: {
+      current_grade_id: "HSLA-340",
+      current_thk_mm: 1.6,
+      part_family: "b_pillar_reinf",
+      annual_volume: 150000,
+      blank_area_m2: 0.9,
+      current_coating_id: "GA",
+      current_joining_ids: ["RSW"],
+      currency: "INR",
+    },
+  },
+  {
+    label: "Rail · HSLA 1.5 mm",
+    note: "HSLA rail — TRIP780 / DP780 unlock axial-crush + weight save.",
+    input: DEFAULT,
+  },
+];
 
 export default function InputPanel({
   onResult,
 }: {
-  onResult: (r: unknown, input: VaveInput) => void;
+  onResult: (r: unknown, input: VaveInput, currency: CurrencyCode) => void;
 }) {
   const [form, setForm] = useState<VaveInput>(DEFAULT);
+  const [currency, setCurrency] = useState<CurrencyCode>("INR");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,7 +125,7 @@ export default function InputPanel({
       });
       if (!res.ok) throw new Error(await res.text());
       const json = await res.json();
-      onResult(json, form);
+      onResult(json, form, currency);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Generation failed");
     } finally {
@@ -70,9 +135,43 @@ export default function InputPanel({
 
   return (
     <section className="card">
-      <h2 className="text-lg font-semibold mb-4 text-steel-50">
-        Baseline part
-      </h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-semibold text-steel-50">Baseline part</h2>
+        <div className="flex gap-1 text-xs">
+          {(["INR", "USD", "EUR"] as CurrencyCode[]).map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`px-2 py-1 rounded border ${
+                currency === c
+                  ? "border-accent-500 text-accent-500"
+                  : "border-steel-600 text-steel-300"
+              }`}
+              onClick={() => setCurrency(c)}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <div className="label">Quick presets (India context)</div>
+        <div className="flex flex-wrap gap-2">
+          {PRESETS.map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              className="chip hover:!bg-accent-500 hover:!text-steel-900 hover:!border-accent-500"
+              title={p.note}
+              onClick={() => setForm(p.input)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="label">Part family</label>
@@ -103,7 +202,8 @@ export default function InputPanel({
           </select>
           {selectedGrade && (
             <p className="mt-1 text-[11px] text-steel-400">
-              Typical gauge range {selectedGrade.typical_thk_mm[0]}–{selectedGrade.typical_thk_mm[1]} mm
+              Typical gauge range {selectedGrade.typical_thk_mm[0]}–
+              {selectedGrade.typical_thk_mm[1]} mm
             </p>
           )}
         </div>
@@ -167,7 +267,9 @@ export default function InputPanel({
                 key={j.id}
                 type="button"
                 onClick={() => toggleJoining(j.id)}
-                className={`chip ${active ? "!bg-accent-500 !text-steel-900 !border-accent-500" : ""}`}
+                className={`chip ${
+                  active ? "!bg-accent-500 !text-steel-900 !border-accent-500" : ""
+                }`}
               >
                 {j.name}
               </button>
@@ -186,11 +288,7 @@ export default function InputPanel({
         <button className="btn-primary" onClick={submit} disabled={loading}>
           {loading ? "Generating…" : "Generate VAVE ideas"}
         </button>
-        <button
-          type="button"
-          className="btn-ghost"
-          onClick={() => setForm(DEFAULT)}
-        >
+        <button type="button" className="btn-ghost" onClick={() => setForm(DEFAULT)}>
           Reset
         </button>
       </div>

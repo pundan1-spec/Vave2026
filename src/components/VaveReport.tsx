@@ -1,6 +1,7 @@
 "use client";
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { GenerateResponse, VaveInput } from "@/lib/vave/types";
+import { formatMoney, type CurrencyCode } from "@/lib/vave/currency";
 
 const s = StyleSheet.create({
   page: { padding: 32, fontSize: 10, fontFamily: "Helvetica", color: "#1b2233" },
@@ -9,16 +10,18 @@ const s = StyleSheet.create({
   small: { fontSize: 8, color: "#445674" },
   row: { flexDirection: "row", borderBottom: "1pt solid #c9d2de", paddingVertical: 2 },
   cell: { flex: 1, paddingRight: 4 },
-  chip: { backgroundColor: "#e4e9f0", padding: 2, marginRight: 4, fontSize: 8 },
 });
 
 export default function VaveReport({
   input,
   result,
+  currency,
 }: {
   input: VaveInput;
   result: GenerateResponse;
+  currency: CurrencyCode;
 }) {
+  const digits = currency === "INR" ? 1 : 2;
   return (
     <Document>
       <Page size="A4" style={s.page}>
@@ -27,13 +30,13 @@ export default function VaveReport({
           Part family: {input.part_family} · Baseline: {input.current_grade_id} @{" "}
           {input.current_thk_mm} mm · Coating: {input.current_coating_id} · Joining:{" "}
           {input.current_joining_ids.join(" + ")} · Volume:{" "}
-          {input.annual_volume.toLocaleString()} / yr
+          {input.annual_volume.toLocaleString("en-IN")} / yr · Cost currency: {currency}
         </Text>
 
         <Text style={s.h2}>Baseline</Text>
         <Text>
-          Mass/part {result.baseline.mass_per_part_kg.toFixed(3)} kg · Cost/part $
-          {result.baseline.cost_per_part_usd.toFixed(2)}
+          Mass/part {result.baseline.mass_per_part_kg.toFixed(3)} kg · Cost/part{" "}
+          {formatMoney(result.baseline.cost_per_part_usd, currency, { fractionDigits: digits })}
         </Text>
         {result.baseline.notes.map((n, i) => (
           <Text key={i} style={s.small}>
@@ -47,7 +50,8 @@ export default function VaveReport({
           <Text style={[s.cell, { flex: 3 }]}>Title</Text>
           <Text style={s.cell}>Δ kg</Text>
           <Text style={s.cell}>Δ %</Text>
-          <Text style={s.cell}>Δ $/part</Text>
+          <Text style={s.cell}>Δ {currency}/part</Text>
+          <Text style={s.cell}>Δ {currency}/yr</Text>
           <Text style={s.cell}>Conf.</Text>
         </View>
         {result.ideas.map((idea, i) => (
@@ -56,7 +60,12 @@ export default function VaveReport({
             <Text style={[s.cell, { flex: 3 }]}>{idea.title}</Text>
             <Text style={s.cell}>{idea.weight_delta_kg.toFixed(3)}</Text>
             <Text style={s.cell}>{idea.weight_delta_pct.toFixed(1)}%</Text>
-            <Text style={s.cell}>${idea.cost_delta_per_part_usd.toFixed(2)}</Text>
+            <Text style={s.cell}>
+              {formatMoney(idea.cost_delta_per_part_usd, currency, { fractionDigits: digits })}
+            </Text>
+            <Text style={s.cell}>
+              {formatMoney(idea.cost_delta_program_usd, currency, { compact: true })}
+            </Text>
             <Text style={s.cell}>{idea.confidence}</Text>
           </View>
         ))}
@@ -76,6 +85,8 @@ export default function VaveReport({
 
         <Text style={s.small}>
           Data anchored to WorldAutoSteel AHSS Application Guidelines & AHSS Insights.
+          Indian OEM context: baselines often IF / IF-HS / Mild / HSLA;
+          lightweight ideas move to BH / DP / TRIP / PHS per part function.
         </Text>
       </Page>
     </Document>

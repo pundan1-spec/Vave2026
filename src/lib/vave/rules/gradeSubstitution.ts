@@ -28,12 +28,21 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
     if (cand.avoid_for.includes(input.part_family)) continue;
 
     let new_thk_mm: number;
+    let stiffnessSwap = false;
     if (base.rule.stiffness_dominated) {
-      // Stiffness parity: same E (for steel) so t_new = t_old (no gain from grade change alone).
-      // We skip pure grade swap for stiffness-dominated parts — handled by gauge_reduction rule.
-      continue;
+      // Pure stiffness (E·t³) doesn't change across steel grades, but a higher-YS grade
+      // enables dent resistance / oil-canning parity with stiffener redesign —
+      // a realistic VAVE move for IF/Mild baselines on inner panels and closures.
+      if (cand.ys_mpa <= base.grade.ys_mpa) continue;
+      if (!base.rule.preferred_families.includes(cand.family)) continue;
+      const gaugeFactor = Math.max(
+        0.8,
+        Math.sqrt(base.grade.ys_mpa / cand.ys_mpa),
+      );
+      new_thk_mm = input.current_thk_mm * gaugeFactor;
+      stiffnessSwap = true;
     } else {
-      // Strength parity
+      // Strength parity (UTS·t)
       new_thk_mm = baselineUtsThk / cand.uts_mpa;
     }
 
@@ -89,6 +98,10 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
       risks.push(`High CE ${cand.ce_max} — weld schedule development required`);
     if (base.rule.function === "crash" && cand.uts_mpa < base.grade.uts_mpa)
       risks.push("Downgrade in UTS for a crash part — verify intrusion / energy absorption");
+    if (stiffnessSwap)
+      risks.push(
+        "Stiffness-dominated part: gauge-down driven by YS parity — requires stiffener / bead redesign and dent-resistance validation",
+      );
 
     const formability_note =
       cand.te_pct >= 15
@@ -98,7 +111,9 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
     const crash_note =
       base.rule.function === "crash"
         ? `UTS·t parity ${(cand.uts_mpa * new_thk_mm).toFixed(0)} vs baseline ${baselineUtsThk.toFixed(0)} N/mm.`
-        : `Stiffness ratio (t³) ${(Math.pow(new_thk_mm, 3) / baselineStiffnessT3).toFixed(2)}×.`;
+        : stiffnessSwap
+          ? `YS gain ${base.grade.ys_mpa}→${cand.ys_mpa} MPa enables ${((1 - new_thk_mm / input.current_thk_mm) * 100).toFixed(0)}% down-gauge with bead/stiffener redesign.`
+          : `Stiffness ratio (t³) ${(Math.pow(new_thk_mm, 3) / baselineStiffnessT3).toFixed(2)}×.`;
 
     const coating_note = `${new_coating}: corrosion class ${
       (cand.typical_coatings.includes(new_coating) ? "ok" : "check")

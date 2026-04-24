@@ -62,6 +62,33 @@ describe("VAVE engine — B-pillar reinforcement baseline", () => {
   });
 });
 
+describe("VAVE engine — IF door inner (India baseline)", () => {
+  const doorInner: VaveInput = {
+    current_grade_id: "IF-180",
+    current_thk_mm: 0.75,
+    part_family: "door_inner",
+    annual_volume: 200000,
+    blank_area_m2: 1.1,
+    current_coating_id: "GA",
+    current_joining_ids: ["RSW"],
+  };
+
+  it("surfaces stronger grades (IF-HS, BH, HSLA, DP) for an IF baseline", () => {
+    const out = generate(doorInner);
+    const subs = out.ideas.filter((i) => i.lever === "grade_substitution");
+    expect(subs.length).toBeGreaterThan(0);
+    const upgradeTargets = subs.map((s) => s.new_grade_id);
+    expect(upgradeTargets.some((g) => g.startsWith("IF-HS") || g.startsWith("BH") || g.startsWith("HSLA") || g.startsWith("DP"))).toBe(true);
+  });
+
+  it("returns baseline cost in USD (currency conversion happens in UI)", () => {
+    const out = generate(doorInner);
+    expect(out.baseline.cost_per_part_usd).toBeGreaterThan(0);
+    // IF-180 at 0.75 mm over 1.1 m²: ~6.5 kg steel → a few USD per part.
+    expect(out.baseline.cost_per_part_usd).toBeLessThan(30);
+  });
+});
+
 describe("VAVE engine — floor pan (stiffness-dominated)", () => {
   const floorInput: VaveInput = {
     current_grade_id: "HSLA-340",

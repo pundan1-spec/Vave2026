@@ -1,5 +1,6 @@
 "use client";
 import type { Idea } from "@/lib/vave/types";
+import { formatMoney, signed, type CurrencyCode } from "@/lib/vave/currency";
 
 const LEVER_LABEL: Record<Idea["lever"], string> = {
   grade_substitution: "Grade",
@@ -8,7 +9,15 @@ const LEVER_LABEL: Record<Idea["lever"], string> = {
   coating: "Coating",
 };
 
-export default function IdeaCard({ idea, rank }: { idea: Idea; rank: number }) {
+export default function IdeaCard({
+  idea,
+  rank,
+  currency,
+}: {
+  idea: Idea;
+  rank: number;
+  currency: CurrencyCode;
+}) {
   const weightCls =
     idea.weight_delta_kg < 0 ? "text-green-400" : idea.weight_delta_kg > 0 ? "text-red-300" : "text-steel-200";
   const costCls =
@@ -42,18 +51,20 @@ export default function IdeaCard({ idea, rank }: { idea: Idea; rank: number }) {
         </div>
         <div className="text-right shrink-0">
           <div className={`text-lg font-bold ${weightCls}`}>
-            {idea.weight_delta_kg > 0 ? "+" : ""}
+            {signed(idea.weight_delta_kg)}
             {idea.weight_delta_kg.toFixed(3)} kg
           </div>
           <div className="text-[11px] text-steel-400">
             {idea.weight_delta_pct.toFixed(1)}% per part
           </div>
           <div className={`mt-1 text-sm font-semibold ${costCls}`}>
-            {idea.cost_delta_per_part_usd > 0 ? "+" : ""}
-            ${idea.cost_delta_per_part_usd.toFixed(2)}/part
+            {signed(idea.cost_delta_per_part_usd)}
+            {formatMoney(idea.cost_delta_per_part_usd, currency, { fractionDigits: currency === "INR" ? 1 : 2 })}
+            /part
           </div>
           <div className="text-[11px] text-steel-400">
-            Program: ${Math.round(idea.cost_delta_program_usd).toLocaleString()} / yr (±{idea.cost_band_pct}%)
+            Program: {formatMoney(idea.cost_delta_program_usd, currency, { compact: true })} / yr
+            (±{idea.cost_band_pct}%)
           </div>
         </div>
       </header>

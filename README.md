@@ -4,6 +4,8 @@ A Value Analysis / Value Engineering (VAVE) idea generator for automotive Body-i
 
 Data anchored to public **WorldAutoSteel AHSS Application Guidelines** and **AHSS Insights** references (see `sources.md`).
 
+**India context (default):** Indian OEM BIW baselines are typically **IF, IF-HS, Mild or HSLA**. The app defaults to this baseline and proposes part-specific lightweighting moves toward BH / DP / TRIP / PHS families. Costs default to **₹ INR** with a per-session toggle to USD or EUR (INR uses lakh / crore grouping in compact view).
+
 ## Quick start
 
 ```bash
@@ -15,7 +17,7 @@ npm run build       # production build
 
 ## Features (Iteration 1)
 
-- **25+ AHSS grades** — Mild, HSLA, BH, DP, TRIP, CP, MS, PHS, TWIP, 3rd-Gen (Q&P, medium-Mn), FB — with UTS/YS/TE/n/bendability/CE/weldability index.
+- **23 steel grades** — IF, IF-HS, Mild, HSLA, BH, DP, TRIP, CP, MS, PHS, TWIP, 3rd-Gen (Q&P, medium-Mn), FB — with UTS/YS/TE/n/bendability/CE/weldability index. IF and IF-HS added as Indian-OEM baselines.
 - **7 coatings** — Uncoated, GI, GA, EG, Zn-Al-Mg, Al-Si (PHS), Zn-coated PHS.
 - **8 joining methods** — RSW, pulsed RSW, weld-bond, laser, SPR, FDS, clinch, adhesive-only.
 - **16 part families** — B-pillar reinforcement, A-pillar, rocker, rail, roof rail, bumper beam, cross member, floor pan, door inner, door impact beam, closure outer, seat structure, crash box, tunnel reinforcement, and more.
