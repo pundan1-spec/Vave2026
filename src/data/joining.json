@@ -1,0 +1,93 @@
+[
+  {
+    "id": "RSW",
+    "name": "Resistance Spot Weld",
+    "applies_to_uts_max_mpa": 1200,
+    "multi_material": false,
+    "capex_index": 1.0,
+    "opex_usd_per_joint": 0.012,
+    "cycle_time_s": 1.2,
+    "notes": "Primary BIW joining. LME risk rises with Zn coating + UHSS (>980 MPa). Use pulsed schedules for UHSS.",
+    "source": "WorldAutoSteel AHSS Insights, RSW of AHSS"
+  },
+  {
+    "id": "RSW_PULSED",
+    "name": "Pulsed RSW (multi-pulse schedule)",
+    "applies_to_uts_max_mpa": 1500,
+    "multi_material": false,
+    "capex_index": 1.05,
+    "opex_usd_per_joint": 0.014,
+    "cycle_time_s": 1.5,
+    "notes": "Mitigates LME in Zn-coated UHSS; broadens current range for DP980/DP1180.",
+    "source": "WorldAutoSteel AHSS Insights, pulsed RSW"
+  },
+  {
+    "id": "RSW_ADHESIVE",
+    "name": "RSW + structural adhesive (weld-bond)",
+    "applies_to_uts_max_mpa": 2000,
+    "multi_material": false,
+    "capex_index": 1.15,
+    "opex_usd_per_joint": 0.035,
+    "cycle_time_s": 2.0,
+    "stiffness_gain_pct": 20,
+    "fatigue_gain_pct": 30,
+    "notes": "Increases stiffness 15–25% and NVH; allows fewer spot welds and/or lighter gauge.",
+    "source": "WorldAutoSteel AHSS Insights, weld-bonding"
+  },
+  {
+    "id": "LASER",
+    "name": "Laser beam welding",
+    "applies_to_uts_max_mpa": 2000,
+    "multi_material": false,
+    "capex_index": 2.0,
+    "opex_usd_per_joint": 0.02,
+    "cycle_time_s": 0.6,
+    "notes": "Enables LWBs and continuous seams. Zn vapour management needed for coated stack.",
+    "source": "WorldAutoSteel AHSS Insights, laser welding"
+  },
+  {
+    "id": "SPR",
+    "name": "Self-Piercing Rivet",
+    "applies_to_uts_max_mpa": 1180,
+    "multi_material": true,
+    "capex_index": 1.3,
+    "opex_usd_per_joint": 0.08,
+    "cycle_time_s": 1.5,
+    "notes": "Works steel-to-Al, UHSS+adhesive stacks. Top-sheet hardness limit ~DP1180.",
+    "source": "WorldAutoSteel AHSS Insights, self-piercing rivets"
+  },
+  {
+    "id": "FDS",
+    "name": "Flow-Drill Screw",
+    "applies_to_uts_max_mpa": 1500,
+    "multi_material": true,
+    "capex_index": 1.2,
+    "opex_usd_per_joint": 0.1,
+    "cycle_time_s": 3.0,
+    "notes": "One-sided access; handles harder top sheets than SPR (e.g. PHS 1500).",
+    "source": "WorldAutoSteel AHSS Insights, flow-drill screws"
+  },
+  {
+    "id": "CLINCH",
+    "name": "Clinching",
+    "applies_to_uts_max_mpa": 780,
+    "multi_material": true,
+    "capex_index": 0.7,
+    "opex_usd_per_joint": 0.005,
+    "cycle_time_s": 1.0,
+    "notes": "Cheap, coating-tolerant, but limited to softer grades and shear-load joints.",
+    "source": "WorldAutoSteel AHSS Insights, clinching"
+  },
+  {
+    "id": "ADHESIVE_ONLY",
+    "name": "Structural adhesive bonding",
+    "applies_to_uts_max_mpa": 2000,
+    "multi_material": true,
+    "capex_index": 1.1,
+    "opex_usd_per_joint": 0.04,
+    "cycle_time_s": 0.0,
+    "stiffness_gain_pct": 25,
+    "notes": "Usually combined with mechanical joint; crash-grade epoxies needed.",
+    "source": "WorldAutoSteel AHSS Insights, adhesive bonding"
+  }
+]

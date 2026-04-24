@@ -1,0 +1,81 @@
+"use client";
+import { useState } from "react";
+import InputPanel from "@/components/InputPanel";
+import IdeaCard from "@/components/IdeaCard";
+import CompareTable from "@/components/CompareTable";
+import WeightCostChart from "@/components/WeightCostChart";
+import ExportButtons from "@/components/ExportButtons";
+import type { GenerateResponse, VaveInput } from "@/lib/vave/types";
+
+export default function Home() {
+  const [result, setResult] = useState<GenerateResponse | null>(null);
+  const [input, setInput] = useState<VaveInput | null>(null);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="lg:col-span-4 space-y-4">
+        <InputPanel
+          onResult={(r, i) => {
+            setResult(r as GenerateResponse);
+            setInput(i);
+          }}
+        />
+        {result && (
+          <div className="card">
+            <h3 className="text-sm font-semibold text-steel-50 mb-1">Baseline</h3>
+            <div className="text-xs text-steel-300">
+              Mass {result.baseline.mass_per_part_kg.toFixed(3)} kg · Cost $
+              {result.baseline.cost_per_part_usd.toFixed(2)} / part
+            </div>
+            <ul className="mt-2 text-[11px] text-steel-400 list-disc pl-4 space-y-1">
+              {result.baseline.notes.map((n, i) => (
+                <li key={i}>{n}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <div className="lg:col-span-8 space-y-4">
+        {!result && (
+          <div className="card text-sm text-steel-300">
+            <h2 className="text-lg font-semibold text-steel-50 mb-2">
+              Generate ideas
+            </h2>
+            <p>
+              Set the baseline on the left and click <b>Generate VAVE ideas</b>. The
+              engine will propose ranked ideas across four levers — grade
+              substitution, gauge reduction, joining stack, and coating — with
+              integrated welding, coating and formability notes, plus weight and
+              cost deltas per part and per program.
+            </p>
+            <ul className="mt-3 list-disc pl-5 text-xs text-steel-400 space-y-1">
+              <li>Stiffness-dominated parts compensate gauge-down with weld-bond.</li>
+              <li>UHSS (≥ 980 MPa) auto-upgrades RSW → pulsed RSW for LME control.</li>
+              <li>PHS mandates Al-Si or Zn-coated PHS.</li>
+              <li>Class-A closures prefer EG for paint finish.</li>
+            </ul>
+          </div>
+        )}
+
+        {result && input && (
+          <>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-steel-50">
+                {result.ideas.length} ranked ideas
+              </h2>
+              <ExportButtons input={input} result={result} />
+            </div>
+            <WeightCostChart ideas={result.ideas} />
+            <CompareTable baseline={result.baseline} ideas={result.ideas} />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              {result.ideas.map((idea, i) => (
+                <IdeaCard key={idea.id} idea={idea} rank={i + 1} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

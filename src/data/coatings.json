@@ -1,0 +1,79 @@
+[
+  {
+    "id": "Uncoated",
+    "name": "Uncoated (CR)",
+    "corrosion_class": 0,
+    "rsw_ease": 1.0,
+    "laser_ease": 1.0,
+    "adhesive_ease": 1.0,
+    "cost_uplift_usd_per_kg": 0.0,
+    "notes": "Reference baseline. For interior / covered parts only.",
+    "source": "WorldAutoSteel AHSS Insights, surface conditions"
+  },
+  {
+    "id": "GI",
+    "name": "Galvanized (HDG, pure Zn)",
+    "corrosion_class": 3,
+    "rsw_ease": 0.9,
+    "laser_ease": 0.8,
+    "adhesive_ease": 0.9,
+    "cost_uplift_usd_per_kg": 0.08,
+    "notes": "Widely used. Zinc vapor at laser weld requires gap/brazing control.",
+    "source": "WorldAutoSteel AHSS Insights, zinc coatings"
+  },
+  {
+    "id": "GA",
+    "name": "Galvannealed (Zn-Fe)",
+    "corrosion_class": 3,
+    "rsw_ease": 0.95,
+    "laser_ease": 0.9,
+    "adhesive_ease": 0.95,
+    "cost_uplift_usd_per_kg": 0.1,
+    "notes": "Better RSW current range and paint adhesion than GI.",
+    "source": "WorldAutoSteel AHSS Insights, galvannealed"
+  },
+  {
+    "id": "EG",
+    "name": "Electrogalvanized",
+    "corrosion_class": 3,
+    "rsw_ease": 0.92,
+    "laser_ease": 0.88,
+    "adhesive_ease": 0.98,
+    "cost_uplift_usd_per_kg": 0.14,
+    "notes": "Preferred for class-A outer panels (surface quality).",
+    "source": "WorldAutoSteel AHSS Insights, EG coatings"
+  },
+  {
+    "id": "ZnAlMg",
+    "name": "Zn-Al-Mg (ZM)",
+    "corrosion_class": 4,
+    "rsw_ease": 0.88,
+    "laser_ease": 0.85,
+    "adhesive_ease": 0.92,
+    "cost_uplift_usd_per_kg": 0.12,
+    "notes": "2–3x corrosion life vs GI at equal mass. Enables thinner coating.",
+    "source": "WorldAutoSteel AHSS Insights, ZM / Zn-Al-Mg"
+  },
+  {
+    "id": "AlSi",
+    "name": "Al-Si (Usibor-class, for PHS)",
+    "corrosion_class": 2,
+    "rsw_ease": 0.7,
+    "laser_ease": 0.6,
+    "adhesive_ease": 0.85,
+    "cost_uplift_usd_per_kg": 0.18,
+    "notes": "Required for uncoated-style PHS to prevent scale; requires laser ablation before LWB welding.",
+    "source": "WorldAutoSteel AHSS Insights, Al-Si coatings for PHS"
+  },
+  {
+    "id": "ZnCoatedPHS",
+    "name": "Zn-coated PHS",
+    "corrosion_class": 4,
+    "rsw_ease": 0.75,
+    "laser_ease": 0.65,
+    "adhesive_ease": 0.9,
+    "cost_uplift_usd_per_kg": 0.2,
+    "notes": "Cathodic protection after paint bake, but needs indirect/2-step PHS route to avoid LME.",
+    "source": "WorldAutoSteel AHSS Insights, Zn-coated PHS"
+  }
+]
