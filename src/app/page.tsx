@@ -38,6 +38,34 @@ export default function Home() {
                 <li key={i}>{n}</li>
               ))}
             </ul>
+            {result.baseline.crash_tests && result.baseline.crash_tests.length > 0 && (
+              <div className="mt-3">
+                <div className="text-[10px] text-steel-400 uppercase tracking-wider mb-1">
+                  Governing crash tests
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {result.baseline.crash_tests.map((t) => (
+                    <span
+                      key={t}
+                      className="chip !text-[10px] !border-blue-500 !text-blue-300"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {result.meta && (
+              <div className="mt-3 text-[10px] text-steel-500">
+                {result.meta.narrated && "AI narratives · "}
+                Region: {result.meta.region}
+                {result.meta.sourcing_india_only && " · India-only"}
+                {result.meta.filtered_out_non_india > 0 &&
+                  ` · ${result.meta.filtered_out_non_india} imported grades hidden`}
+                {result.meta.filtered_out_crash_gate > 0 &&
+                  ` · ${result.meta.filtered_out_crash_gate} failed UTS·t gate`}
+              </div>
+            )}
           </div>
         )}
       </div>

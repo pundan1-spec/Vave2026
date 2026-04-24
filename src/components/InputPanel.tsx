@@ -30,6 +30,8 @@ const DEFAULT: VaveInput = {
   current_coating_id: "GA",
   current_joining_ids: ["RSW"],
   currency: "INR",
+  sourcing_india_only: true,
+  narrate: true,
 };
 
 const PRESETS: {
@@ -49,6 +51,8 @@ const PRESETS: {
       current_coating_id: "GA",
       current_joining_ids: ["RSW"],
       currency: "INR",
+      sourcing_india_only: true,
+      narrate: true,
     },
   },
   {
@@ -63,6 +67,8 @@ const PRESETS: {
       current_coating_id: "GA",
       current_joining_ids: ["RSW"],
       currency: "INR",
+      sourcing_india_only: true,
+      narrate: true,
     },
   },
   {
@@ -77,6 +83,8 @@ const PRESETS: {
       current_coating_id: "GA",
       current_joining_ids: ["RSW"],
       currency: "INR",
+      sourcing_india_only: true,
+      narrate: true,
     },
   },
   {
@@ -276,6 +284,37 @@ export default function InputPanel({
             );
           })}
         </div>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={!!form.sourcing_india_only}
+            onChange={(e) => update("sourcing_india_only", e.target.checked)}
+            className="accent-accent-500"
+          />
+          <span>
+            India-sourcing only
+            <span className="block text-[10px] text-steel-400">
+              Hide grades not produced locally (Tata / JSW / SAIL / AM-NS).
+            </span>
+          </span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.narrate !== false}
+            onChange={(e) => update("narrate", e.target.checked)}
+            className="accent-accent-500"
+          />
+          <span>
+            AI narrative per idea
+            <span className="block text-[10px] text-steel-400">
+              Needs ANTHROPIC_API_KEY; uses Claude Haiku 4.5 with prompt caching.
+            </span>
+          </span>
+        </label>
       </div>
 
       {error && (

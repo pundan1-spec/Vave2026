@@ -72,6 +72,7 @@ function makeCoatingIdea(
     new_coating_id,
     input.current_joining_ids,
     input.part_family,
+    base.region,
   );
   const cost_delta = new_cost - base.cost_usd;
   const idea: Idea = {
@@ -92,6 +93,8 @@ function makeCoatingIdea(
     coating_note: coat.notes,
     formability_note: "N/A — coating change only.",
     crash_note: "No crash change.",
+    crash_tests: base.rule.crash_tests ?? [],
+    suppliers_in_india: base.grade.suppliers_in_india,
     confidence: "high",
     risks,
     sources: [coat.source],

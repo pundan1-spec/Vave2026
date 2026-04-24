@@ -3,6 +3,7 @@ import { generate } from "@/lib/vave/engine";
 import type { VaveInput } from "@/lib/vave/types";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   let body: VaveInput;
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const out = generate(body);
+    const out = await generate(body);
     return NextResponse.json(out);
   } catch (e: unknown) {
     return NextResponse.json(

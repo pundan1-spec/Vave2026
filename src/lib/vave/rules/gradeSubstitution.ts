@@ -9,18 +9,25 @@ import {
 
 const RULE_ID = "grade_substitution";
 
+export interface GradeSubResult {
+  ideas: Idea[];
+  filtered_india: number;
+  filtered_crash: number;
+}
+
 /**
- * For each candidate grade satisfying the part-family UTS floor,
- * compute an equal-strength thickness that keeps load-carrying
- * capacity (UTS * t) parity with the baseline, clipped to the
- * candidate grade's typical gauge range.
+ * For each candidate grade satisfying the part-family gates (UTS floor, UTS·t floor,
+ * supplier availability), compute a parity-preserving thickness and build an Idea.
  */
-export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
+export function gradeSubstitutionIdeas(input: VaveInput): GradeSubResult {
   const base = buildBaseline(input);
   const baselineUtsThk = base.grade.uts_mpa * input.current_thk_mm;
   const baselineStiffnessT3 = Math.pow(input.current_thk_mm, 3);
+  const sourcingIndiaOnly = !!input.sourcing_india_only;
 
   const ideas: Idea[] = [];
+  let filtered_india = 0;
+  let filtered_crash = 0;
 
   for (const cand of GRADES) {
     if (cand.id === base.grade.id) continue;
@@ -30,9 +37,6 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
     let new_thk_mm: number;
     let stiffnessSwap = false;
     if (base.rule.stiffness_dominated) {
-      // Pure stiffness (E·t³) doesn't change across steel grades, but a higher-YS grade
-      // enables dent resistance / oil-canning parity with stiffener redesign —
-      // a realistic VAVE move for IF/Mild baselines on inner panels and closures.
       if (cand.ys_mpa <= base.grade.ys_mpa) continue;
       if (!base.rule.preferred_families.includes(cand.family)) continue;
       const gaugeFactor = Math.max(
@@ -42,15 +46,30 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
       new_thk_mm = input.current_thk_mm * gaugeFactor;
       stiffnessSwap = true;
     } else {
-      // Strength parity (UTS·t)
-      new_thk_mm = baselineUtsThk / cand.uts_mpa;
+      // Candidate must satisfy both baseline UTS·t parity AND the part's regulatory floor.
+      const target_utst = Math.max(baselineUtsThk, base.rule.min_utst_nmm ?? 0);
+      new_thk_mm = target_utst / cand.uts_mpa;
     }
 
     const [tMin, tMax] = cand.typical_thk_mm;
     new_thk_mm = Math.max(tMin, Math.min(tMax, new_thk_mm));
     new_thk_mm = Math.round(new_thk_mm * 100) / 100;
 
-    // Require meaningful change
+    // Crash gate — the clipped thickness must satisfy the part's UTS·t floor
+    if (
+      base.rule.min_utst_nmm !== undefined &&
+      cand.uts_mpa * new_thk_mm < base.rule.min_utst_nmm
+    ) {
+      filtered_crash++;
+      continue;
+    }
+
+    // Supplier gate (India-only sourcing)
+    if (sourcingIndiaOnly && cand.suppliers_in_india.length === 0) {
+      filtered_india++;
+      continue;
+    }
+
     if (Math.abs(new_thk_mm - input.current_thk_mm) < 0.05 && cand.family === base.grade.family) {
       continue;
     }
@@ -59,13 +78,11 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
     const delta_kg = new_mass - base.mass_kg;
     const delta_pct = (delta_kg / base.mass_kg) * 100;
 
-    // Coating: keep if compatible, else swap
     let new_coating = input.current_coating_id;
     if (cand.family === "PHS") new_coating = "AlSi";
     if (!cand.typical_coatings.includes(new_coating))
       new_coating = cand.typical_coatings[0];
 
-    // Joining: auto-upgrade for UHSS
     let new_joining = [...input.current_joining_ids];
     const weldabilityNotes: string[] = [];
     if (cand.uts_mpa >= 980 && new_joining.includes("RSW")) {
@@ -84,6 +101,7 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
       new_coating,
       new_joining,
       input.part_family,
+      base.region,
     );
 
     const cost_delta_per_part = new_cost - base.cost_usd;
@@ -102,21 +120,29 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
       risks.push(
         "Stiffness-dominated part: gauge-down driven by YS parity — requires stiffener / bead redesign and dent-resistance validation",
       );
+    if (cand.suppliers_in_india.length === 0)
+      risks.push("Not locally produced in India — import (POSCO / imports) extends lead time");
 
     const formability_note =
       cand.te_pct >= 15
         ? `Good formability (TE ${cand.te_pct}%, n ${cand.n_value}).`
         : `Limited formability (TE ${cand.te_pct}%); consider roll-forming or PHS for complex geometry.`;
 
+    const crashTestTag =
+      base.rule.crash_tests && base.rule.crash_tests.length > 0
+        ? ` · ${base.rule.crash_tests.join("; ")}`
+        : "";
     const crash_note =
-      base.rule.function === "crash"
-        ? `UTS·t parity ${(cand.uts_mpa * new_thk_mm).toFixed(0)} vs baseline ${baselineUtsThk.toFixed(0)} N/mm.`
+      base.rule.function === "crash" || base.rule.function === "crash_energy"
+        ? `UTS·t ${(cand.uts_mpa * new_thk_mm).toFixed(0)} N/mm vs baseline ${baselineUtsThk.toFixed(0)}${
+            base.rule.min_utst_nmm ? ` (floor ${base.rule.min_utst_nmm})` : ""
+          }.${crashTestTag}`
         : stiffnessSwap
           ? `YS gain ${base.grade.ys_mpa}→${cand.ys_mpa} MPa enables ${((1 - new_thk_mm / input.current_thk_mm) * 100).toFixed(0)}% down-gauge with bead/stiffener redesign.`
           : `Stiffness ratio (t³) ${(Math.pow(new_thk_mm, 3) / baselineStiffnessT3).toFixed(2)}×.`;
 
     const coating_note = `${new_coating}: corrosion class ${
-      (cand.typical_coatings.includes(new_coating) ? "ok" : "check")
+      cand.typical_coatings.includes(new_coating) ? "ok" : "check"
     }.`;
 
     const confidence: "high" | "medium" | "low" =
@@ -140,11 +166,14 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
       cost_delta_per_part_usd: +cost_delta_per_part.toFixed(3),
       cost_delta_program_usd: +cost_delta_program.toFixed(0),
       cost_band_pct: 15,
-      weldability_note: weldabilityNotes.join(" ") ||
+      weldability_note:
+        weldabilityNotes.join(" ") ||
         `Weldability index ${cand.weldability_idx}; RSW compatible.`,
       coating_note,
       formability_note,
       crash_note,
+      crash_tests: base.rule.crash_tests ?? [],
+      suppliers_in_india: cand.suppliers_in_india,
       confidence,
       risks,
       sources: [cand.source],
@@ -154,5 +183,5 @@ export function gradeSubstitutionIdeas(input: VaveInput): Idea[] {
     ideas.push(idea);
   }
 
-  return ideas;
+  return { ideas, filtered_india, filtered_crash };
 }

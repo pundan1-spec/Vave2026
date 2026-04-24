@@ -14,6 +14,8 @@ export type GradeFamily =
   | "MedMn"
   | "FB";
 
+export type Region = "INDIA" | "GLOBAL";
+
 export interface Grade {
   id: string;
   name: string;
@@ -28,6 +30,8 @@ export interface Grade {
   weldability_idx: number;
   typical_coatings: string[];
   cost_index_usd_per_kg: number;
+  price_inr_per_kg: number;
+  suppliers_in_india: string[];
   density_kg_m3: number;
   typical_thk_mm: [number, number];
   best_for: string[];
@@ -65,6 +69,8 @@ export interface PartRule {
   label: string;
   function: "crash" | "crash_energy" | "structural" | "closure";
   min_uts_mpa: number;
+  min_utst_nmm?: number;
+  crash_tests?: string[];
   preferred_families: GradeFamily[];
   coating_required: string[];
   stiffness_dominated: boolean;
@@ -81,6 +87,9 @@ export interface VaveInput {
   current_coating_id: string;
   current_joining_ids: string[];
   currency?: "USD" | "INR" | "EUR";
+  region?: Region;
+  sourcing_india_only?: boolean;
+  narrate?: boolean;
 }
 
 export type IdeaLever =
@@ -107,19 +116,30 @@ export interface Idea {
   coating_note: string;
   formability_note: string;
   crash_note: string;
+  crash_tests?: string[];
+  suppliers_in_india?: string[];
   confidence: "high" | "medium" | "low";
   risks: string[];
   sources: string[];
   score: number;
+  narrative?: string;
 }
 
 export interface BaselineSummary {
   mass_per_part_kg: number;
   cost_per_part_usd: number;
   notes: string[];
+  crash_tests?: string[];
 }
 
 export interface GenerateResponse {
   baseline: BaselineSummary;
   ideas: Idea[];
+  meta: {
+    region: Region;
+    sourcing_india_only: boolean;
+    narrated: boolean;
+    filtered_out_non_india: number;
+    filtered_out_crash_gate: number;
+  };
 }

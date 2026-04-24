@@ -3,76 +3,91 @@
     "label": "B-pillar Reinforcement",
     "function": "crash",
     "min_uts_mpa": 1200,
+    "min_utst_nmm": 2200,
+    "crash_tests": ["AIS-098 side impact (MDB 50 km/h)", "AIS-145 side pole (29 km/h)"],
     "preferred_families": ["PHS", "MS", "MedMn", "DP"],
     "coating_required": ["AlSi", "ZnCoatedPHS", "GA", "GI"],
     "stiffness_dominated": false,
     "notes": "Intrusion-critical. Typically PHS1500 today; 3rd-gen Q&P/MedMn emerging.",
-    "source": "Steel E-Motive / FSV reference architecture"
+    "source": "Steel E-Motive / FSV reference architecture; ARAI AIS-098 / AIS-145"
   },
   "b_pillar_outer": {
     "label": "B-pillar Outer",
     "function": "crash",
     "min_uts_mpa": 780,
+    "min_utst_nmm": 1100,
+    "crash_tests": ["AIS-098 side impact", "AIS-145 side pole"],
     "preferred_families": ["TRIP", "DP", "QP"],
     "coating_required": ["GA", "GI", "EG"],
     "stiffness_dominated": false,
     "notes": "Needs formability + strength; TRIP780 / DP780 / Q&P980 typical.",
-    "source": "Steel E-Motive / FSV reference architecture"
+    "source": "Steel E-Motive / FSV reference architecture; ARAI AIS-098"
   },
   "a_pillar_reinf": {
     "label": "A-pillar Reinforcement",
     "function": "crash",
     "min_uts_mpa": 1200,
+    "min_utst_nmm": 2000,
+    "crash_tests": ["AIS-099 offset frontal (ODB 56 km/h)", "AIS-146 roof crush"],
     "preferred_families": ["PHS", "MS"],
     "coating_required": ["AlSi", "ZnCoatedPHS"],
     "stiffness_dominated": false,
     "notes": "Roof-crush and offset-frontal. PHS1500 standard.",
-    "source": "Steel E-Motive / FSV reference architecture"
+    "source": "Steel E-Motive / FSV reference architecture; AIS-099 / AIS-146"
   },
   "rocker": {
     "label": "Rocker / Sill",
     "function": "crash",
     "min_uts_mpa": 980,
+    "min_utst_nmm": 1600,
+    "crash_tests": ["AIS-098 side impact", "AIS-145 side pole"],
     "preferred_families": ["DP", "CP", "PHS", "MS", "MedMn", "QP"],
     "coating_required": ["GA", "GI", "AlSi"],
     "stiffness_dominated": false,
     "notes": "Side-pole intrusion critical; BEVs require battery protection.",
-    "source": "Steel E-Motive"
+    "source": "Steel E-Motive; AIS-098 / AIS-145"
   },
   "rocker_reinf": {
     "label": "Rocker Reinforcement",
     "function": "crash",
     "min_uts_mpa": 1500,
+    "min_utst_nmm": 2400,
+    "crash_tests": ["AIS-098 side impact", "AIS-145 side pole"],
     "preferred_families": ["PHS", "MS"],
     "coating_required": ["AlSi", "ZnCoatedPHS"],
     "stiffness_dominated": false,
     "notes": "Inner reinforcement, PHS1500/2000 typical.",
-    "source": "Steel E-Motive"
+    "source": "Steel E-Motive; AIS-098 / AIS-145"
   },
   "rail": {
     "label": "Front / Rear Rail",
     "function": "crash_energy",
     "min_uts_mpa": 590,
+    "min_utst_nmm": 900,
+    "crash_tests": ["AIS-096 full frontal (rigid wall 48 km/h)", "AIS-099 offset frontal"],
     "preferred_families": ["DP", "TRIP", "QP", "CP"],
     "coating_required": ["GA", "GI"],
     "stiffness_dominated": false,
     "notes": "Energy absorption — wants high elongation × strength product.",
-    "source": "WorldAutoSteel AHSS Insights, crash energy absorption"
+    "source": "WorldAutoSteel AHSS Insights, crash energy absorption; AIS-096 / AIS-099"
   },
   "bumper_beam": {
     "label": "Bumper Beam",
     "function": "crash",
     "min_uts_mpa": 1200,
+    "min_utst_nmm": 1500,
+    "crash_tests": ["AIS-096 full frontal", "IIHS low-speed (Part 581 eq.)"],
     "preferred_families": ["MS", "PHS", "CP"],
     "coating_required": ["GI", "AlSi"],
     "stiffness_dominated": false,
     "notes": "Roll-formed MS1500 / PHS typical.",
-    "source": "WorldAutoSteel AHSS Insights, bumper beams"
+    "source": "WorldAutoSteel AHSS Insights, bumper beams; AIS-096"
   },
   "cross_member": {
     "label": "Cross Member",
     "function": "structural",
     "min_uts_mpa": 440,
+    "crash_tests": [],
     "preferred_families": ["HSLA", "DP", "TRIP", "QP"],
     "coating_required": ["GA", "GI"],
     "stiffness_dominated": true,
@@ -83,6 +98,7 @@
     "label": "Floor Pan",
     "function": "structural",
     "min_uts_mpa": 270,
+    "crash_tests": [],
     "preferred_families": ["IF", "IF-HS", "Mild", "HSLA", "BH", "DP"],
     "coating_required": ["GA", "GI", "EG"],
     "stiffness_dominated": true,
@@ -93,6 +109,7 @@
     "label": "Door Inner",
     "function": "structural",
     "min_uts_mpa": 330,
+    "crash_tests": [],
     "preferred_families": ["IF", "IF-HS", "BH", "HSLA", "DP"],
     "coating_required": ["GA", "GI", "EG"],
     "stiffness_dominated": true,
@@ -103,16 +120,19 @@
     "label": "Door Impact Beam",
     "function": "crash",
     "min_uts_mpa": 1200,
+    "min_utst_nmm": 1500,
+    "crash_tests": ["AIS-098 side impact", "AIS-145 side pole"],
     "preferred_families": ["MS", "PHS", "DP"],
     "coating_required": ["GI", "GA"],
     "stiffness_dominated": false,
     "notes": "Side intrusion; MS1500 tubular common.",
-    "source": "WorldAutoSteel AHSS Insights, side impact"
+    "source": "WorldAutoSteel AHSS Insights; AIS-098"
   },
   "closure_outer": {
     "label": "Closure Outer (Class-A)",
     "function": "closure",
     "min_uts_mpa": 270,
+    "crash_tests": ["AIS-100 pedestrian head impact (for hood)"],
     "preferred_families": ["BH", "IF-HS", "IF", "Mild"],
     "coating_required": ["EG", "GA", "GI"],
     "stiffness_dominated": true,
@@ -123,16 +143,20 @@
     "label": "Roof Rail",
     "function": "crash",
     "min_uts_mpa": 980,
+    "min_utst_nmm": 1500,
+    "crash_tests": ["AIS-146 roof crush"],
     "preferred_families": ["PHS", "DP", "MedMn"],
     "coating_required": ["AlSi", "GA", "GI"],
     "stiffness_dominated": false,
     "notes": "Roof-crush; often LWB with B-pillar.",
-    "source": "Steel E-Motive"
+    "source": "Steel E-Motive; AIS-146"
   },
   "tunnel_reinf": {
     "label": "Tunnel Reinforcement",
     "function": "crash",
     "min_uts_mpa": 980,
+    "min_utst_nmm": 1400,
+    "crash_tests": ["AIS-099 offset frontal", "AIS-096 full frontal"],
     "preferred_families": ["PHS", "DP", "MS"],
     "coating_required": ["AlSi", "GA"],
     "stiffness_dominated": false,
@@ -143,6 +167,7 @@
     "label": "Seat Structure",
     "function": "structural",
     "min_uts_mpa": 590,
+    "crash_tests": ["AIS-005 seat anchorage"],
     "preferred_families": ["DP", "TRIP", "QP", "MS"],
     "coating_required": ["GA", "GI"],
     "stiffness_dominated": false,
@@ -153,10 +178,12 @@
     "label": "Crash Box",
     "function": "crash_energy",
     "min_uts_mpa": 590,
+    "min_utst_nmm": 800,
+    "crash_tests": ["AIS-096 full frontal", "Low-speed front (≤16 km/h)"],
     "preferred_families": ["DP", "TRIP", "TWIP", "QP"],
     "coating_required": ["GA", "GI"],
     "stiffness_dominated": false,
     "notes": "Axial crush — elongation × strength rules.",
-    "source": "WorldAutoSteel AHSS Insights, crash boxes"
+    "source": "WorldAutoSteel AHSS Insights, crash boxes; AIS-096"
   }
 }

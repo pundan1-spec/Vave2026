@@ -64,6 +64,7 @@ export function joiningStackIdeas(input: VaveInput): Idea[] {
       input.current_coating_id,
       c.ids,
       input.part_family,
+      base.region,
     );
     const cost_delta = new_cost - base.cost_usd;
 
@@ -90,6 +91,8 @@ export function joiningStackIdeas(input: VaveInput): Idea[] {
       coating_note: `${input.current_coating_id}: unchanged.`,
       formability_note: "N/A — joining-only change.",
       crash_note: stiffnessUplift ? `+${stiffnessUplift}% joint stiffness, +30% fatigue.` : "No mass-bearing change.",
+      crash_tests: base.rule.crash_tests ?? [],
+      suppliers_in_india: base.grade.suppliers_in_india,
       confidence: "high",
       risks: c.risks ?? [],
       sources: methods.map((m) => m.source),

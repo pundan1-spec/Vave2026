@@ -37,10 +37,17 @@ export function gaugeReductionIdeas(input: VaveInput): Idea[] {
         );
       }
     } else {
-      // Crash part — gauge reduction alone is risky without a stronger grade
       risks.push(
         "Crash-function part: gauge-down without grade-up reduces UTS·t — verify intrusion.",
       );
+    }
+
+    // Crash gate — skip if below the part UTS·t floor
+    if (
+      base.rule.min_utst_nmm !== undefined &&
+      base.grade.uts_mpa * new_thk_mm < base.rule.min_utst_nmm
+    ) {
+      continue;
     }
 
     const new_cost = costPerPartUsd(
@@ -50,6 +57,7 @@ export function gaugeReductionIdeas(input: VaveInput): Idea[] {
       input.current_coating_id,
       new_joining,
       input.part_family,
+      base.region,
     );
     const cost_delta = new_cost - base.cost_usd;
 
@@ -75,6 +83,8 @@ export function gaugeReductionIdeas(input: VaveInput): Idea[] {
       crash_note: base.rule.stiffness_dominated
         ? `Stiffness ratio t³ ${(Math.pow(new_thk_mm, 3) / Math.pow(input.current_thk_mm, 3)).toFixed(2)}× (adhesive recovers).`
         : `UTS·t drops ${((1 - factor) * 100).toFixed(0)}% — flagged.`,
+      crash_tests: base.rule.crash_tests ?? [],
+      suppliers_in_india: base.grade.suppliers_in_india,
       confidence: base.rule.stiffness_dominated ? "high" : "low",
       risks,
       sources: [base.grade.source, "WorldAutoSteel AHSS Insights, weld-bonding"],
